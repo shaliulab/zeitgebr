@@ -2,11 +2,30 @@
 % Please edit documentation in R/periodogram.R
 \name{periodogram}
 \alias{periodogram}
+\alias{periodogram_standard}
 \title{Computes periodograms}
 \usage{
-periodogram(var, data, period_range = c(hours(16), hours(32)),
-  resample_rate = 1/mins(15), alpha = 0.01, FUN = chi_sq_periodogram,
-  ...)
+periodogram(
+  var,
+  data,
+  period_range = c(hours(16), hours(32)),
+  resample_rate = 1/mins(15),
+  alpha = 0.01,
+  bin = TRUE,
+  FUN = chi_sq_periodogram,
+  ...
+)
+
+periodogram_standard(
+  var,
+  data,
+  period_range = c(hours(16), hours(32)),
+  resample_rate = 1/mins(15),
+  alpha = 0.01,
+  FUN = chi_sq_periodogram,
+  bin = TRUE,
+  ...
+)
 }
 \arguments{
 \item{var}{variable to analyse}
@@ -18,6 +37,8 @@ periodogram(var, data, period_range = c(hours(16), hours(32)),
 \item{resample_rate}{frequency to resample (up or down) the data at (in hertz)}
 
 \item{alpha}{significance level}
+
+\item{bin}{logical, if TRUE the data is binned over time before resampling}
 
 \item{FUN}{function used to compute periodogram (see \link{periodogram_methods})}
 
@@ -31,11 +52,15 @@ The data contains the columns:
 \item \code{power} -- the power the or equivalent (according to \code{FUN})
 \item \code{period} -- the period at which \code{power} is computed (in seconds)
 \item \code{p_value} -- the p value associated to the power estimation
-\item \code{signif threshold} -- the threshold above which power is considered significant
+\item \verb{signif threshold} -- the threshold above which power is considered significant
 }
 }
 \description{
 This function builds periodograms, with one of several methods, for each individual of a \link{behavr} table
+}
+\details{
+periodogram standard takes a character variable in var and performs standard evaluation
+(easily programmable). periodogram takes an expresion as var
 }
 \examples{
 data(dams_sample)
@@ -48,6 +73,15 @@ require(ggetho)
 ggperio(pdt, aes(colour=period_group)) + stat_pop_etho()
 }
 
+data(dams_sample)
+# only a half of the individuals for the sake of the example
+dt <- dams_sample[xmv(region_id) \%in\% (1:16 * 2)]
+pdt <- periodogram_standard("activity", dt, FUN = ls_periodogram, oversampling = 4)
+pdt <- periodogram_standard("activity", dt, FUN = chi_sq_periodogram)
+\donttest{
+require(ggetho)
+ggperio(pdt, aes(colour=period_group)) + stat_pop_etho()
+}
 }
 \references{
 \itemize{

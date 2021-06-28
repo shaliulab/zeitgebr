@@ -30,5 +30,5 @@ Encoding: UTF-8
 LazyData: true
 URL: https://github.com/rethomics/zeitgebr
 BugReports: https://github.com/rethomics/zeitgebr/issues
-RoxygenNote: 6.1.1
+RoxygenNote: 7.1.1
 Roxygen: list(markdown = TRUE)

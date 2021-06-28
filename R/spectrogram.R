@@ -47,9 +47,39 @@ spectrogram <- function(var,
   n_val = var__ = key = . = .N = t0 = .SD = NULL
 
   var_of_interest <- deparse(substitute(var))
-  regular_data <- resample(data, var_of_interest, resample_rate)
+  spectrogram_standard(var=var_of_interest, data=data, period_range=period_range, resample_rate=resample_rate, FUN=FUN, ...)
+}
+
+#' @rdname spectrogram
+#' @export
+#' @examples
+#' data(dams_sample)
+#' dt <- dams_sample[id %in% dams_sample[meta=TRUE, ,id[1:5]]]
+#' spect_dt <- spectrogram_standard("activity", dt)
+#'
+#' \donttest{
+#' require(ggetho)
+#' ggspectro(spect_dt) +
+#'         stat_tile_etho() +
+#'         scale_y_log10() +
+#'         facet_wrap(~ id)
+#' }
+#' @seealso
+#' * [periodogram] -- to compute periodogram instead
+#' * [cwt_spectrogram] -- The dunction use to compute individual spectrograms
+#' * [ggetho::ggspectro] -- to plot spectrograms
+#' @references
+#' * [spectrogram tutorial](https://rethomics.github.io/ggetho.html#spectrograms) -- the relevant rehtomics tutorial
+spectrogram_standard <- function(var,
+                                 data,
+                                 period_range = c(hours(16), hours(32)),
+                                 resample_rate = 1 / mins(15),
+                                 FUN = cwt_spectrogram,
+                                 ...) {
+
+  regular_data <- resample(data, var, resample_rate)
   key <- data.table::key(regular_data)
-  data.table::setnames(regular_data, var_of_interest, "var__")
+  data.table::setnames(regular_data, var, "var__")
 
   reg_data_nval <- regular_data[, .(n_val = length(unique(var__))),
                                 by = c(key)]
@@ -69,5 +99,6 @@ spectrogram <- function(var,
   time_origin <- data[, .(t0 = .SD[1,t]),by=c(key)]
   out[, t:= out[time_origin, on=key][,t +t0]]
   out
+
 }
 

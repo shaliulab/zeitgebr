@@ -7,6 +7,7 @@
 #' @param period_range vector of size 2 defining minimal and maximal range of period to study (in seconds)
 #' @param resample_rate frequency to resample (up or down) the data at (in hertz)
 #' @param alpha  significance level
+#' @param bin logical, if TRUE the data is binned over time before resampling
 #' @param FUN  function used to compute periodogram (see [periodogram_methods])
 #' @param ...  additional arguments to be passed to FUN
 #' @return A [behavr::behavr] table.
@@ -35,27 +36,52 @@
 #' @references
 #' * [zeitgebr tutorial](https://rethomics.github.io/zeitgebr.html) -- the relevant rehtomics tutorial
 #' @export
-
-
-
 periodogram <- function(var,
                         data,
                         period_range = c(hours(16), hours(32)),
                         resample_rate = 1 / mins(15),
                         alpha = 0.01,
+                        bin=TRUE,
                         FUN = chi_sq_periodogram,
                         ...){
 
   n_val = var__ = key = . = .N = NULL
 
   var_of_interest <- deparse(substitute(var))
-  regular_data <- resample(data, var_of_interest, resample_rate)
+  periodogram_standard(var=var_of_interest, data=data, period_range=period_range, resample_rate=resample_rate, alpha=alpha, FUN=FUN, ...)
+}
+
+#' @rdname periodogram
+#' @export
+#' @details periodogram standard takes a character variable in var and performs standard evaluation
+#' (easily programmable). periodogram takes an expresion as var
+#' @examples
+#' data(dams_sample)
+#' # only a half of the individuals for the sake of the example
+#' dt <- dams_sample[xmv(region_id) %in% (1:16 * 2)]
+#' pdt <- periodogram_standard("activity", dt, FUN = ls_periodogram, oversampling = 4)
+#' pdt <- periodogram_standard("activity", dt, FUN = chi_sq_periodogram)
+#' \donttest{
+#' require(ggetho)
+#' ggperio(pdt, aes(colour=period_group)) + stat_pop_etho()
+#' }
+periodogram_standard <- function(var,
+                                 data,
+                                 period_range = c(hours(16), hours(32)),
+                                 resample_rate = 1 / mins(15),
+                                 alpha = 0.01,
+                                 FUN = chi_sq_periodogram,
+                                 bin=TRUE,
+                                 ...){
+
+  # take the mean signal in blocks of 1 / resample_rate second periods
+  # set the x (t) so it is evenly space
+  regular_data <- resample(data, var, resample_rate, bin=TRUE)
 
   key = data.table::key(regular_data)
+  data.table::setnames(regular_data, var, "var__")
 
-
-  data.table::setnames(regular_data, var_of_interest, "var__")
-
+  # remove individuals where signal is flat
   reg_data_nval <- regular_data[, .(n_val = length(unique(var__))),
                                 by = c(key)]
 
@@ -66,7 +92,6 @@ periodogram <- function(var,
     warning(sprintf("Removing individuals that have only one unique value for `val`:\n%s",
                     paste(invalid, sep="\n")))
 
-
   regular_data <- regular_data[!(key %in% invalid)]
   regular_data[, FUN(var__,
                      period_range = period_range,
@@ -74,18 +99,26 @@ periodogram <- function(var,
                      alpha = alpha,
                      ...),
                by = c(key)]
-
 }
 
+#' Bin data over time and take equidistant points over time
 #' helper unit-testable function
 #' @noRd
-resample <- function(data, var_of_interest, resample_rate){
+resample <- function(data, var_of_interest, resample_rate, bin=TRUE){
   .N  = .SD = NULL
-  regular_data <- behavr::bin_apply_all(data,
-                                        x = "t",
-                                        y = var_of_interest,
-                                        x_bin_length = 1 / resample_rate,
-                                        string_xy = TRUE)
+
+  if (bin) {
+    regular_data <- behavr::bin_apply_all(
+      data,
+      x = "t",
+      y = var_of_interest,
+      x_bin_length = 1 / resample_rate,
+      string_xy = TRUE
+    )
+  } else {
+    regular_data <- data
+  }
+
   f <- function(d){
     new_x <- seq(from = d[1, t], to = d[.N, t], by=1/resample_rate)
     out <- na.omit(data.table::as.data.table(approx(d[["t"]],y = d[[var_of_interest]], xout = new_x)))

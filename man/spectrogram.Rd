@@ -2,10 +2,26 @@
 % Please edit documentation in R/spectrogram.R
 \name{spectrogram}
 \alias{spectrogram}
+\alias{spectrogram_standard}
 \title{Computes spectrogram}
 \usage{
-spectrogram(var, data, period_range = c(hours(16), hours(32)),
-  resample_rate = 1/mins(15), FUN = cwt_spectrogram, ...)
+spectrogram(
+  var,
+  data,
+  period_range = c(hours(16), hours(32)),
+  resample_rate = 1/mins(15),
+  FUN = cwt_spectrogram,
+  ...
+)
+
+spectrogram_standard(
+  var,
+  data,
+  period_range = c(hours(16), hours(32)),
+  resample_rate = 1/mins(15),
+  FUN = cwt_spectrogram,
+  ...
+)
 }
 \arguments{
 \item{var}{variable to analyse}
@@ -51,13 +67,34 @@ ggspectro(spect_dt) +
         scale_y_log10() +
         facet_wrap(~ id)
 }
+data(dams_sample)
+dt <- dams_sample[id \%in\% dams_sample[meta=TRUE, ,id[1:5]]]
+spect_dt <- spectrogram_standard("activity", dt)
+
+\donttest{
+require(ggetho)
+ggspectro(spect_dt) +
+        stat_tile_etho() +
+        scale_y_log10() +
+        facet_wrap(~ id)
+}
 }
 \references{
 \itemize{
 \item \href{https://rethomics.github.io/ggetho.html#spectrograms}{spectrogram tutorial} -- the relevant rehtomics tutorial
 }
+
+\itemize{
+\item \href{https://rethomics.github.io/ggetho.html#spectrograms}{spectrogram tutorial} -- the relevant rehtomics tutorial
+}
 }
 \seealso{
+\itemize{
+\item \link{periodogram} -- to compute periodogram instead
+\item \link{cwt_spectrogram} -- The dunction use to compute individual spectrograms
+\item \link[ggetho:ggspectro]{ggetho::ggspectro} -- to plot spectrograms
+}
+
 \itemize{
 \item \link{periodogram} -- to compute periodogram instead
 \item \link{cwt_spectrogram} -- The dunction use to compute individual spectrograms

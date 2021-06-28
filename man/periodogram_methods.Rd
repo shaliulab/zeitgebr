@@ -11,22 +11,44 @@
 \alias{ls_periodogram}
 \title{Methods For Computing Periodograms}
 \usage{
-ac_periodogram(x, period_range = c(hours(16), hours(32)),
-  sampling_rate = 1/mins(1), alpha = 0.05)
+ac_periodogram(
+  x,
+  period_range = c(hours(16), hours(32)),
+  sampling_rate = 1/mins(1),
+  alpha = 0.05
+)
 
-chi_sq_periodogram(x, period_range = c(hours(16), hours(32)),
-  sampling_rate = 1/mins(1), alpha = 0.05,
-  time_resolution = hours(0.1))
+chi_sq_periodogram(
+  x,
+  period_range = c(hours(16), hours(32)),
+  sampling_rate = 1/mins(1),
+  alpha = 0.05,
+  time_resolution = hours(0.1)
+)
 
-cwt_periodogram(x, period_range = c(hours(16), hours(32)),
-  sampling_rate = 1/mins(1), alpha = 0.05, resolution = 1/512,
-  n_sim = 10)
+cwt_periodogram(
+  x,
+  period_range = c(hours(16), hours(32)),
+  sampling_rate = 1/mins(1),
+  alpha = 0.05,
+  resolution = 1/512,
+  n_sim = 10
+)
 
-fourier_periodogram(x, period_range = c(hours(16), hours(32)),
-  sampling_rate = 1/mins(1), alpha = 0.05)
+fourier_periodogram(
+  x,
+  period_range = c(hours(16), hours(32)),
+  sampling_rate = 1/mins(1),
+  alpha = 0.05
+)
 
-ls_periodogram(x, period_range = c(hours(16), hours(32)),
-  sampling_rate = 1/mins(1), alpha = 0.05, oversampling = 8)
+ls_periodogram(
+  x,
+  period_range = c(hours(16), hours(32)),
+  sampling_rate = 1/mins(1),
+  alpha = 0.05,
+  oversampling = 8
+)
 }
 \arguments{
 \item{x}{numeric vector}
